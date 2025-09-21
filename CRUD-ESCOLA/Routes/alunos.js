@@ -28,3 +28,76 @@ let alunos = [
     dataNascimento: '2004-12-31'
   }
 ];
+
+// listar todos os alunos
+router.get('/', (req, res) => {
+  res.json(alunos);
+});
+
+// buscar aluno por id
+router.get('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const aluno = alunos.find(a => a.id === id);
+
+  if (!aluno) {
+    return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  }
+
+  res.json(aluno);
+});
+
+// criar um novo aluno
+router.post('/', (req, res) => {
+  const { nome, email, cpf, telefone, dataNascimento } = req.body;
+
+    const novoAluno = {
+    id: alunos.length ? alunos[alunos.length - 1].id + 1 : 1,
+    nome,
+    email,
+    cpf,
+    telefone,
+    dataNascimento
+  };
+
+  alunos.push(novoAluno);
+  res.status(201).json(novoAluno);
+});
+
+// atualizar aluno
+router.put('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const { nome, email, cpf, telefone, dataNascimento } = req.body;
+
+  const index = alunos.findIndex(a => a.id === id);
+  if (index === -1) {
+    return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  }
+
+  if (!nome || !email || !cpf || !telefone || !dataNascimento) {
+    return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
+  }
+
+  if (alunos.some(a => a.cpf === cpf && a.id !== id)) {
+    return res.status(400).json({ erro: 'CPF já está em uso.' });
+  }
+  if (alunos.some(a => a.email === email && a.id !== id)) {
+    return res.status(400).json({ erro: 'E-mail já está em uso.' });
+  }
+
+  alunos[index] = { id, nome, email, cpf, telefone, dataNascimento };
+  res.json(alunos[index]);
+});
+
+// deletar aluno
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const index = alunos.findIndex(a => a.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ erro: 'Aluno não encontrado.' });
+  }
+
+  const removido = alunos.splice(index, 1)[0];
+  res.json({ mensagem: 'Aluno removido com sucesso.', aluno: removido });
+});
+
