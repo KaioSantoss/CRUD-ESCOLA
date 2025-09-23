@@ -29,6 +29,15 @@ let professores = [
   },
 ];
 
+// Middleware para validar campos obrigatórios
+function validarCampos(req, res, next) {
+  const { nome, email, cpf, curso, disciplina } = req.body;
+  if (!nome || !email || !cpf || !curso || !disciplina) {
+    return res.status(400).json({ erro: "Todos os campos são obrigatórios." });
+  }
+  next();
+}
+
 // GET - Listar todos os professores
 router.get("/", (req, res) => {
   res.json(professores);
@@ -48,6 +57,14 @@ router.get("/:id", (req, res) => {
 // POST - Criar novo professor
 router.post("/", validarCampos, (req, res) => {
   const { nome, email, cpf, curso, disciplina } = req.body;
+
+    // Verifica duplicatas por CPF ou email
+  const existe = professores.find(
+    (p) => p.cpf === cpf || p.email === email
+  );
+  if (existe) {
+    return res.status(400).json({ erro: "Professor já cadastrado." });
+  }
 
    const novoProfessor = {
     id: professores.length > 0 ? professores[professores.length - 1].id + 1 : 1,
@@ -73,6 +90,14 @@ router.put("/:id", validarCampos, (req, res) => {
 
   const { nome, email, cpf, curso, disciplina } = req.body;
 
+   // Evita duplicatas em atualização (exceto para o próprio)
+  const duplicado = professores.find(
+    (p) => (p.cpf === cpf || p.email === email) && p.id !== id
+  );
+  if (duplicado) {
+    return res.status(400).json({ erro: "CPF ou e-mail já cadastrados." });
+  }
+  
    professores[index] = { id, nome, email, cpf, curso, disciplina };
   res.json(professores[index]);
 });
