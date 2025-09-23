@@ -11,6 +11,8 @@ app.use('/alunos', alunosRouter);
 
 
 // Rotas de Professores - Membro 2: Jamylle Cesario Soares Silva
+const professoresRouter = require('./routes/professores')
+app.use('/professores', professoresRouter)
 
 
 app.listen(3000, () => {
